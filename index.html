@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Read Excel File</title>
+
+    <script src="https://unpkg.com/read-excel-file@4.x/bundle/read-excel-file.min.js"></script>
+  </head>
+  <body>
+    <div
+      style="
+        margin: auto;
+        width: 50%;
+        margin-top: 80px;
+        padding: 30px;
+        background-color: #dedede;
+      "
+    >
+      <h2>Excel to JSON Converter</h2>
+      <input type="file" id="input" accept=".xlsx, .xls, .csv" />
+      <br />
+      <textarea
+        name="json-data"
+        id="json-data"
+        rows="25"
+        style="width: 100%"
+      ></textarea
+      >\ <br /><br />
+      <button id="dl-json">Download JSON file</button>
+      <!-- <button id="dl-js">Download js object file</button> -->
+    </div>
+
+    <script>
+      let input = document.getElementById("input");
+
+      let jsObject = {};
+      input.addEventListener("change", () => {
+        readXlsxFile(input.files[0]).then((data) => {
+          //   console.log(data);
+          let i = 0;
+          let headers = [];
+          let json_object = [];
+
+          data.map((row, index) => {
+            if (i === 0) {
+              headers = row;
+            }
+            if (i > 0) {
+              let temp = {};
+
+              for (let x = 0; x < row.length; x++) {
+                temp[headers[x]] = row[x];
+              }
+
+              json_object.push(temp);
+            }
+            i++;
+          });
+
+          document.getElementById("json-data").value = JSON.stringify(
+            json_object,
+            null,
+            2
+          );
+
+          const value = JSON.stringify(json_object, null, 2);
+          console.log(value);
+
+          jsObject = JSON.parse(value);
+          console.log(jsObject);
+
+          //   document.getElementById("json-data").value = JSON.parse(value);
+        });
+      });
+
+      document.getElementById("dl-json").onclick = () => {
+        let json_str = document.getElementById("json-data").value;
+        downloadObjectAsJson(json_str, "excel-to-JSON");
+      };
+
+      function downloadObjectAsJson(str, filename) {
+        let data_str =
+          "data:text/json;charset=utf-8," + encodeURIComponent(str);
+        let anchor = document.createElement("a");
+        anchor.setAttribute("href", data_str);
+        anchor.setAttribute("download", filename + ".json");
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+      }
+    </script>
+  </body>
+</html>
